@@ -42,6 +42,8 @@ python -m app.scripts.<file_name_without_ext>
 
 ## 7. Onion Architecture
 
+```text
+
 app/
 │
 ├── domain/                        # Core Business Layer (NO external deps)
@@ -130,3 +132,5 @@ app/
 │   └── api/
 │
 └── main.py                        # FastAPI entry point
+
+```
