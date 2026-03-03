@@ -33,7 +33,7 @@ Onion Architecture
 
 ### 5. Migrations (Alembic)
 
-- alembic init alembic # alembic one-time setup
+- alembic init app/infrastructure/db/migrations # alembic one-time setup
 - alembic check || alembic revision --autogenerate -m "Initial" # make migration file
 - alembic upgrade head # migration
 
