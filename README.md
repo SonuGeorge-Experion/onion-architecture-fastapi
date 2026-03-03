@@ -25,11 +25,11 @@ Onion Architecture
 ### 4. Run the app
 
 - uvicorn app.main:app --reload  # local
-- uvicorn app.main:app --host 0.0.0.0 --port <port-address> --workers <no-of-wrokers> # dev/prod
+- uvicorn app.main:app --host 0.0.0.0 --port `<port-address>` --workers `<no-of-wrokers>` # dev/prod
 - gunicorn app.main:app \
     -k uvicorn.workers.UvicornWorker \
-    -w <no-of-workers> \
-    -b 0.0.0.0:<port-address>  # with gunicorn 
+    -w `<no-of-workers>` \
+    -b 0.0.0.0:`<port-address>`  # with gunicorn 
 
 ### 5. Migrations (Alembic)
 
