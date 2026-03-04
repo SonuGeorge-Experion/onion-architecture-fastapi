@@ -17,6 +17,16 @@ WORKDIR /ms_app
 # RUN apt-get update -qq && \
 #     apt-get install -y --no-install-recommends libpq5 && \
 #     rm -rf /var/lib/apt/lists/*
+# psycopg2
+# RUN apt-get update && apt-get install -y \
+#  gcc \
+#   libpq-dev \
+#    python3-dev \
+#     && rm -rf /var/lib/apt/lists/*
+# docker build -t fastapi-app .
+# docker run -it -p 8000:8000 fastapi-app
+# docker logs 949e7090c492
+
 
 # Upgrade pip first
 RUN python -m pip install --upgrade pip
