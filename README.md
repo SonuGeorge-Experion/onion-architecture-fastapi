@@ -36,6 +36,7 @@ Onion Architecture
 #### With Docker in local 
 
 - docker build -t fastapi-app .
+- docker build -f Dockerfile.dev -t fastapi-app . # Dockerfile with extension 
 - docker run -d -it --net=host fastapi-app # for same netwrok as that of host (local run)
 - docker run -it -p 8000:8000 fastapi-app # if not same network as that of host
 - docker ps # active conatiner

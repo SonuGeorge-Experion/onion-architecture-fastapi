@@ -9,21 +9,19 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PORT=8000 \
     GUNICORN_WORKERS=2
 
-# Create application directory
+ARG STAGE=dev
+ENV STAGE=${STAGE}
+
 WORKDIR /ms_app
 
-# Install system dependencies if needed by wheels (kept minimal for slim image)
-# If your project needs system libs (e.g., for database drivers), add them here.
 # RUN apt-get update -qq && \
-#     apt-get install -y --no-install-recommends libpq5 && \
+#     apt-get install -y --no-install-recommends build-essential && \
 #     rm -rf /var/lib/apt/lists/*
-# psycopg2
-# RUN apt-get update && apt-get install -y \
-#  gcc \
-#   libpq-dev \
-#    python3-dev \
-#     && rm -rf /var/lib/apt/lists/*
 
+# RUN apt-get update -qq \
+#   && apt-get install -y --no-install-recommends build-essential curl vim-tiny telnet vim sudo net-tools certbot less systemctl awscli wget
+
+# RUN apt-get install nginx
 
 # Upgrade pip first
 RUN python -m pip install --upgrade pip
@@ -39,6 +37,9 @@ RUN pip install --no-cache-dir -r requirements.txt && \
 # Copy the rest of the application code
 COPY . .
 
+# Make entrypoint executable
+RUN chmod +x /ms_app/docker_entrypoint.sh
+
 # Create a non-root user and adjust permissions
 RUN useradd -m -u 10001 -s /usr/sbin/nologin appuser && \
     chown -R appuser:appuser /ms_app
@@ -47,7 +48,10 @@ USER appuser
 # Expose the application port
 EXPOSE 8000
 
-# Start the application (currently using Uvicorn). Previous Gunicorn command is kept commented below for later use.
-# Tune workers via env: GUNICORN_WORKERS, PORT
+ENTRYPOINT ["./docker_entrypoint.sh"]
+
+
+# RUN chmod +x /ms_service/nginx.sh
+# RUN chmod +x /ms_service/docker-entrypoint.sh
+
 # CMD ["sh", "-c", "gunicorn -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:${PORT} --workers ${GUNICORN_WORKERS} --timeout 60 --graceful-timeout 30 --keep-alive 5 --access-logfile - --error-logfile - --log-level info app.main:app"]
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT}"]
