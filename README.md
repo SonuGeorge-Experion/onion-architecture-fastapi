@@ -24,12 +24,31 @@ Onion Architecture
 
 ### 4. Run the app
 
+#### Without Docker
+
 - uvicorn app.main:app --reload  # local
 - uvicorn app.main:app --host 0.0.0.0 --port `<port-address>` --workers `<no-of-wrokers>` # dev/prod
 - gunicorn app.main:app \
     -k uvicorn.workers.UvicornWorker \
     -w `<no-of-workers>` \
     -b 0.0.0.0:`<port-address>`  # with gunicorn 
+
+#### With Docker in local 
+
+- docker build -t fastapi-app .
+- docker build -f Dockerfile.dev -t fastapi-app . # Dockerfile with extension 
+- docker run -d -it --net=host fastapi-app # for same netwrok as that of host (local run)
+- docker run -it -p 8000:8000 fastapi-app # if not same network as that of host
+- docker ps # active conatiner
+- docker ps -a # all containers
+- docker start `<conatiner_id>` # start docker
+- docker stop `<container_id>` # stop docker
+- docker start -ai `<container_id>` # start the container with terminal log
+- docker logs `<container_id>` # for logs
+- docker rm `<container_id>` # remove a stopped conatiner
+- docker images # list all images
+- docker rmi `<image_id>` # remove a docker image
+
 
 ### 5. Migrations (Alembic)
 
