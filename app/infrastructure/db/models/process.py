@@ -13,9 +13,11 @@ from sqlalchemy import (
     Time,
     UniqueConstraint,
     text,
+    Text,
+    Boolean,
 )
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import Boolean, Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.infrastructure.db.base_class import Base, TimestampMixin
 

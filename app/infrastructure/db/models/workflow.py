@@ -1,4 +1,4 @@
-import datetime
+import datetime, decimal
 from typing import Optional
 
 from sqlalchemy import (
@@ -13,9 +13,12 @@ from sqlalchemy import (
     Time,
     UniqueConstraint,
     text,
+    Text,
+    Boolean,
+    Numeric,
 )
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import Boolean, Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.infrastructure.db.base_class import Base, TimestampMixin
 

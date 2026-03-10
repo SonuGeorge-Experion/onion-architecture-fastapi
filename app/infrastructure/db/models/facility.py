@@ -13,9 +13,10 @@ from sqlalchemy import (
     Time,
     UniqueConstraint,
     text,
+    Boolean,
 )
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import Boolean, Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.infrastructure.db.base_class import Base, TimestampMixin
 
@@ -109,7 +110,12 @@ class RoomSessions(Base):
             name="room_sessions_shift_id_fkey",
         ),
         PrimaryKeyConstraint("session_id", name="room_sessions_pkey"),
-        Index("idx_one_active_session_per_room", "room_id", unique=True, postgresql_where=text("status = 'active'::session_status_enum")),
+        Index(
+            "idx_one_active_session_per_room",
+            "room_id",
+            unique=True,
+            postgresql_where=text("status = 'active'::session_status_enum"),
+        ),
         Index("idx_sessions_donor", "donor_id"),
         Index("idx_sessions_room", "room_id"),
         Index("idx_sessions_status", "status"),
