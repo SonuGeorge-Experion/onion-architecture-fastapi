@@ -1,13 +1,13 @@
 from typing import Optional
 
-from sqlalchemy import asc, desc, func, select
+from sqlalchemy import asc, desc, exists, func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import Select
-from sqlalchemy.exc import IntegrityError
 
 from app.domain.entities.donor import Donor as DomainDonor
-from app.domain.repositories.donor_repository import DonorRepository
 from app.domain.exceptions import DuplicateZNumberException
+from app.domain.repositories.donor_repository import DonorRepository
 from app.infrastructure.db.models.donor import Donors
 from app.infrastructure.db.repositories.base_repository import BaseRepository
 from app.infrastructure.db.utils import model_to_domain
@@ -17,6 +17,17 @@ class DonorRepositoryORM(BaseRepository, DonorRepository):
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(session, model_cls=Donors, domain_cls=DomainDonor)
 
+    async def exists_by_znumber(self, znumber: int) -> bool:
+        """
+        Checks if a donor exists in the database by their ZNumber.
+        Returns True if found, False otherwise.
+        """
+        # This generates a 'SELECT EXISTS(SELECT 1 FROM donors WHERE ...)' SQL statement
+        stmt = select(exists().where(Donors.znumber == znumber))
+
+        res = await self.session.execute(stmt)
+        return res.scalar() or False
+
     async def add(self, donor: DomainDonor) -> DomainDonor:
         try:
             return await self.create(donor, id_field="donor_id")
@@ -24,7 +35,11 @@ class DonorRepositoryORM(BaseRepository, DonorRepository):
             # Map DB unique-constraint on znumber to domain exception
             # Works for PostgreSQL (psycopg) and other dialects exposing 'orig' with constraint name
             err_msg = str(getattr(exc, "orig", exc))
-            if "donors_znumber_key" in err_msg or "unique constraint" in err_msg.lower() and "znumber" in err_msg.lower():
+            if (
+                "donors_znumber_key" in err_msg
+                or "unique constraint" in err_msg.lower()
+                and "znumber" in err_msg.lower()
+            ):
                 raise DuplicateZNumberException(str(donor.znumber)) from exc
             raise
 
