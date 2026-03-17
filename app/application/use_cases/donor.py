@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional
 
-from app.application.dtos.donor import DonorDTO, DonorListDTO
+from app.application.dtos.donor import CreateDonorInputDTO, DonorListDTO
 from app.core.logging import get_logger
 from app.domain.entities.donor import Donor as DomainDonor
 from app.domain.repositories.donor_repository import DonorRepository
@@ -11,18 +11,30 @@ class AddDonorUseCase:
         self.repository = repository
         self.logger = get_logger(self.__class__.__name__)
 
-    async def execute(self, data: Dict[str, Any]) -> DonorDTO:
-        """Create a donor from a mapping of fields.
+    async def execute(self, input_dto: CreateDonorInputDTO) -> DomainDonor:
+        """Create a donor from input DTO.
 
-        Accepting a single mapping scales to large tables and keeps the
-        callsite simple (pass `payload.model_dump()`). The mapping is used to
-        construct the domain entity and passed to the repository.
+        Returns the domain entity directly. Conversion to output DTO
+        is the responsibility of the caller (typically the router/API layer).
         """
-        self.logger.debug("AddDonorUseCase called", extra={"payload_keys": list(data.keys())})
-        domain_donor = DomainDonor(donor_id=None, **data)
+        self.logger.debug(
+            "AddDonorUseCase called",
+            extra={"donor_name": input_dto.name, "znumber": input_dto.znumber},
+        )
+        domain_donor = DomainDonor(
+            donor_id=None,
+            znumber=input_dto.znumber,
+            name=input_dto.name,
+            age=input_dto.age,
+            region=input_dto.region,
+            other_factors=input_dto.other_factors,
+        )
         created = await self.repository.add(domain_donor)
-        self.logger.info("Donor created", extra={"donor_id": created.donor_id, "znumber": created.znumber})
-        return DonorDTO(**created.__dict__)
+        self.logger.info(
+            "Donor created",
+            extra={"donor_id": created.donor_id, "znumber": created.znumber},
+        )
+        return created
 
 
 class ListDonorsUseCase:
@@ -38,8 +50,23 @@ class ListDonorsUseCase:
         order_dir: str = "asc",
         page: int = 1,
         per_page: int = 20,
-    ) -> DonorListDTO:
-        self.logger.debug("ListDonorsUseCase called", extra={"filters": filters, "search": search, "order_by": order_by, "order_dir": order_dir, "page": page, "per_page": per_page})
+    ) -> tuple[list[DomainDonor], int]:
+        """List donors with filtering, search, sorting, and pagination.
+
+        Returns tuple of (domain entities list, total count).
+        Conversion to output DTOs is the responsibility of the caller.
+        """
+        self.logger.debug(
+            "ListDonorsUseCase called",
+            extra={
+                "filters": filters,
+                "search": search,
+                "order_by": order_by,
+                "order_dir": order_dir,
+                "page": page,
+                "per_page": per_page,
+            },
+        )
         items, total = await self.repository.list(
             filters=filters,
             search=search,
@@ -48,11 +75,8 @@ class ListDonorsUseCase:
             page=page,
             per_page=per_page,
         )
-        self.logger.info("Donors listed", extra={"count": len(items), "total": total, "page": page})
-
-        return DonorListDTO(
-            items=[DonorDTO(**d.__dict__) for d in items],
-            total=total,
-            page=page,
-            per_page=per_page,
+        self.logger.info(
+            "Donors listed",
+            extra={"count": len(items), "total": total, "page": page},
         )
+        return items, total
