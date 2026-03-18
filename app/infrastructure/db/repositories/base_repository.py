@@ -23,9 +23,8 @@ class BaseRepository:
         payload = prepare_model_payload(domain_obj, id_field=id_field)
         model = self.model_cls(**payload)
 
-        async with self.session.begin():
-            self.session.add(model)
-            await self.session.flush()
+        self.session.add(model)
+        await self.session.commit()
 
         await self.session.refresh(model)
         return model_to_domain(model, self.domain_cls)

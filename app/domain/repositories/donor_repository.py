@@ -20,3 +20,7 @@ class DonorRepository(ABC):
     ) -> tuple[list[Donor], int]:
         """Return a tuple of (items, total_count)."""
         raise NotImplementedError
+    
+    @abstractmethod
+    async def exists_by_znumber(self, znumber: int) -> bool:
+        raise NotImplementedError

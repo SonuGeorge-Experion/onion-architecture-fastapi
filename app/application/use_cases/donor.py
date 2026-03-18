@@ -25,16 +25,15 @@ class AddDonorUseCase:
 
         # check for duplicate znumber before creating domain entity to avoid unnecessary DB transaction
         znumber = input_dto.znumber
-        DonorService().validate_unique_znumber(znumber, self.repository)
+        await DonorService().validate_unique_znumber(znumber, self.repository)
         # add donor
-        domain_donor = DomainDonor.create(donor_id=None, **input_dto)
+        domain_donor = DomainDonor.create(donor_id=None, **vars(input_dto))
         created = await self.repository.add(domain_donor)
         self.logger.info(
             "Donor created",
             extra={"donor_id": created.donor_id, "znumber": created.znumber},
         )
         return created
-
 
 
 class ListDonorsUseCase:

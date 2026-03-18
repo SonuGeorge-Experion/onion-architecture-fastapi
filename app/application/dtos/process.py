@@ -4,7 +4,7 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict
 
-from app.application.dtos.donor import DonorDTO
+from app.application.dtos.donor import DonorOutputDTO
 
 
 class WorkflowStepDTO(BaseModel):
@@ -60,7 +60,7 @@ class TissueDTO(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class DonorProcessDetailsDTO(DonorDTO):
+class DonorProcessDetailsDTO(DonorOutputDTO):
     tissues: List[TissueDTO] = []
 
     model_config = ConfigDict(from_attributes=True)
