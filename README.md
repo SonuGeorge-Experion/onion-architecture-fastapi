@@ -66,7 +66,7 @@ python -m app.scripts.<file_name_without_ext>
 app/
 │
 ├── domain/                        # Core Business Layer (NO external deps)
-│   ├── entities/                  # Business objects
+│   ├── entities/                  # Business objects, Entity with factory method
 │   │   ├── donor.py
 │   │   ├── process.py
 │   │   └── resources.py

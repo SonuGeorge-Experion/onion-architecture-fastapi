@@ -4,6 +4,7 @@ from app.application.dtos.donor import CreateDonorInputDTO, DonorListDTO
 from app.core.logging import get_logger
 from app.domain.entities.donor import Donor as DomainDonor
 from app.domain.repositories.donor_repository import DonorRepository
+from app.domain.services.donor_service import DonorService
 
 
 class AddDonorUseCase:
@@ -21,20 +22,19 @@ class AddDonorUseCase:
             "AddDonorUseCase called",
             extra={"donor_name": input_dto.name, "znumber": input_dto.znumber},
         )
-        domain_donor = DomainDonor(
-            donor_id=None,
-            znumber=input_dto.znumber,
-            name=input_dto.name,
-            age=input_dto.age,
-            region=input_dto.region,
-            other_factors=input_dto.other_factors,
-        )
+
+        # check for duplicate znumber before creating domain entity to avoid unnecessary DB transaction
+        znumber = input_dto.znumber
+        DonorService().validate_unique_znumber(znumber, self.repository)
+        # add donor
+        domain_donor = DomainDonor.create(donor_id=None, **input_dto)
         created = await self.repository.add(domain_donor)
         self.logger.info(
             "Donor created",
             extra={"donor_id": created.donor_id, "znumber": created.znumber},
         )
         return created
+
 
 
 class ListDonorsUseCase:
