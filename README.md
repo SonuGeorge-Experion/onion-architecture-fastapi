@@ -22,6 +22,29 @@ Onion Architecture
 
 - pip install -r requirements.txt
 
+### 4. VS Code Workspace Settings
+
+Add the following to your `.vscode/settings.json` file to enable Black, Ruff, and isort integration:
+
+```json
+{
+  "python.formatting.provider": "black",
+  "python.linting.enabled": true,
+  "python.linting.ruffEnabled": true,
+  "python.linting.ruffPath": "ruff",
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit"
+  },
+  "python.sortImports.args": ["--profile", "black"]
+}
+```
+- Rerun the tool manually to update the settings
+``` Bash
+black .
+ruff check .
+isort .
+```
+
 ### 4. Run the app
 
 #### Without Docker
