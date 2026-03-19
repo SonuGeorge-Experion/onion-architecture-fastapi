@@ -24,25 +24,23 @@ Onion Architecture
 
 ### 4. VS Code Workspace Settings
 
-Add the following to your `.vscode/settings.json` file to enable Black, Ruff, and isort integration:
+Add the following to your `.vscode/settings.json` file to enable Ruff integration:
 
 ```json
 {
-  "python.formatting.provider": "black",
-  "python.linting.enabled": true,
-  "python.linting.ruffEnabled": true,
-  "python.linting.ruffPath": "ruff",
-  "editor.codeActionsOnSave": {
-    "source.organizeImports": "explicit"
+  "editor.formatOnSave": true,
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff"
   },
-  "python.sortImports.args": ["--profile", "black"]
+  "editor.codeActionsOnSave": {
+    "source.fixAll.ruff": "explicit"
+  },
+  "editor.formatOnPaste": true
 }
 ```
-- Rerun the tool manually to update the settings
+- Rerun the tool manually to update the settings and pyproject.toml file
 ``` Bash
-black .
 ruff check .
-isort .
 ```
 
 ### 4. Run the app
