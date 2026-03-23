@@ -43,6 +43,25 @@ Add the following to your `.vscode/settings.json` file to enable Ruff integratio
 ruff check .
 ```
 
+### 4. Precommit hook
+
+- Install the hook defined in `.pre-commit-config.yaml` into your Git repos `.git/hooks` directory
+``` Bash
+pre-commit install
+```
+- Run hooks manually on all files
+``` Bash
+pre-commit run --all-files
+```
+- Update hooks to the latest version
+``` Bash
+pre-commit autoupdate
+```
+- Skip hook for a commit
+``` Bash
+git commit -m "hotfix: code change" --no-verify
+```
+
 ### 4. Run the app
 
 #### Without Docker
