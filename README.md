@@ -35,7 +35,9 @@ Add the following to your `.vscode/settings.json` file to enable Ruff integratio
   "editor.codeActionsOnSave": {
     "source.fixAll.ruff": "explicit"
   },
-  "editor.formatOnPaste": true
+  "editor.formatOnPaste": true,
+  "editor.rulers": [88],
+  "files.trimTrailingWhitespace": true
 }
 ```
 - Rerun the tool manually to update the settings and pyproject.toml file
