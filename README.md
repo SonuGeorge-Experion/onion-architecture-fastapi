@@ -63,6 +63,11 @@ pre-commit autoupdate
 ``` Bash
 git commit -m "hotfix: code change" --no-verify
 ```
+### 4. Security Scan 
+- Bandit
+``` Bash
+pre-commit run bandit --all-files
+```
 
 ### 4. Run the app
 
