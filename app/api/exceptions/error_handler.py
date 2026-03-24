@@ -45,7 +45,9 @@ def register_exception_handlers(app):
 
     # Request validation errors → 422, log with details
     @app.exception_handler(RequestValidationError)
-    async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    async def validation_exception_handler(
+        request: Request, exc: RequestValidationError
+    ):
         logger.warning(
             "Request validation error",
             extra={
