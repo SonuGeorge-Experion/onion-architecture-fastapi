@@ -18,8 +18,22 @@ class WorkflowRepositoryORM(BaseRepository, WorkflowRepository):
     async def deactivate_active_by_category(self, category_id: int) -> None:
         stmt = (
             update(Workflows)
-            .where(Workflows.category_id == category_id, Workflows.is_active == True)
+            .where(Workflows.category_id == category_id, Workflows.is_active)
             .values(is_active=False)
         )
         await self.session.execute(stmt)
-        await self.session.commit()
+
+    async def get_by_category_id(
+        self, category_id: int | None = None
+    ) -> list[DomainWorkflow] | None:
+        stmt = select(Workflows)
+        if category_id is not None:
+            stmt = stmt.where(Workflows.category_id == category_id)
+
+        res = await self.session.execute(stmt)
+        workflows = res.scalars().all()
+
+        if not workflows:
+            return None
+
+        return [model_to_domain(w, DomainWorkflow) for w in workflows]

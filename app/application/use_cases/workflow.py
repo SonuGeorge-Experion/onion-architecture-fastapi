@@ -1,7 +1,7 @@
+from app.application.dtos.workflow import CreateWorkflowInputDTO
 from app.core.logging import get_logger
 from app.domain.entities.workflow import Workflow as DomainWorkflow
 from app.domain.repositories.workflow_repository import WorkflowRepository
-from app.application.dtos.workflow import CreateWorkflowInputDTO
 
 
 class AddWorkflowUseCase:
@@ -20,7 +20,10 @@ class AddWorkflowUseCase:
         """
         self.logger.debug(
             "AddWorkflowUseCase called",
-            extra={"category_id": input_dto.category_id, "workflow_name": input_dto.name},
+            extra={
+                "category_id": input_dto.category_id,
+                "workflow_name": input_dto.name,
+            },
         )
 
         if input_dto.category_id is not None:
@@ -32,6 +35,35 @@ class AddWorkflowUseCase:
 
         self.logger.info(
             "Workflow created",
-            extra={"workflow_id": created.workflow_id, "category_id": created.category_id},
+            extra={
+                "workflow_id": created.workflow_id,
+                "category_id": created.category_id,
+            },
         )
         return created
+
+
+class GetWorkflowsByCategoryUseCase:
+    def __init__(self, repository: WorkflowRepository) -> None:
+        self.repository = repository
+        self.logger = get_logger(self.__class__.__name__)
+
+    async def execute(
+        self, category_id: int | None = None
+    ) -> list[DomainWorkflow] | None:
+        filter_desc = f"category {category_id}" if category_id else "all categories"
+
+        self.logger.debug(
+            "GetWorkflowsByCategoryUseCase called", extra={"category_id": category_id}
+        )
+        workflows = await self.repository.get_by_category_id(category_id)
+
+        if not workflows:
+            self.logger.info("No workflows found", extra={"filter": filter_desc})
+            return None
+
+        self.logger.info(
+            "Workflows retrieved",
+            extra={"filter": filter_desc, "count": len(workflows)},
+        )
+        return workflows
