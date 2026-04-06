@@ -5,6 +5,7 @@
  fastapi==0.116.1
  httpx==0.28.1
  injector==0.24.0
+ # gunicorn==25.3.0
  passlib==1.7.4
  # psycopg2==2.9.10
  pre-commit==4.5.1

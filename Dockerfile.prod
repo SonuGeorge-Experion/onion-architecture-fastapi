@@ -1,0 +1,61 @@
+# ---------- Builder ----------
+FROM python:3.12-slim AS builder
+
+# Python runtime settings
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PORT=8000 \
+    GUNICORN_WORKERS=2
+
+ARG STAGE=prod
+ENV STAGE=${STAGE}
+
+RUN apt-get update -qq && \
+    apt-get install -y --no-install-recommends \
+        gcc \
+        libpq-dev \
+        python3-dev \
+        curl && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN curl -Ls https://astral.sh/uv/install.sh | sh
+ENV PATH="/root/.local/bin:$PATH"
+
+WORKDIR /ms_app
+COPY pyproject.toml uv.lock ./
+
+RUN uv sync --system --frozen
+
+# ---------- Runtime ----------
+FROM python:3.12-slim
+
+RUN apt-get update -qq && \
+    apt-get install -y --no-install-recommends \
+        libpq5 && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /ms_app
+
+# Copy installed packages from builder
+COPY --from=builder /usr/local/lib/python3.12 /usr/local/lib/python3.12
+COPY --from=builder /usr/local/bin /usr/local/bin
+
+COPY . .
+
+# Make entrypoint executable
+# RUN chmod +x /ms_app/docker_entrypoint.sh
+RUN chmod +x docker-entrypoint.sh
+
+# Create a non-root user and adjust permissions
+RUN useradd -m -u 10001 -s /usr/sbin/nologin appuser && \
+    chown -R appuser:appuser /ms_app
+USER appuser
+
+# Expose the application port
+EXPOSE 8000
+
+ENTRYPOINT ["./docker-entrypoint.sh"]
+
+
+#CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
