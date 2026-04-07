@@ -1,3 +1,4 @@
+from app.api.schemas.workflow import WorkflowResponse
 from app.application.dtos.workflow import CreateWorkflowInputDTO
 from app.core.logging import get_logger
 from app.domain.entities.workflow import Workflow as DomainWorkflow
@@ -66,4 +67,13 @@ class GetWorkflowsByCategoryUseCase:
             "Workflows retrieved",
             extra={"filter": filter_desc, "count": len(workflows)},
         )
-        return workflows
+        return [self._to_response(w) for w in workflows]
+
+    def _to_response(self, w: DomainWorkflow) -> WorkflowResponse:
+        return WorkflowResponse.model_construct(
+            workflow_id=w.workflow_id,
+            name=w.name,
+            template_json=w.template_json,
+            version=w.version,
+            is_active=w.is_active,
+        )
