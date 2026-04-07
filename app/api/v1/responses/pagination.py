@@ -36,3 +36,13 @@ class PaginatedResponse[T](BaseModel):
         default_factory=list, description="List of items for the current page."
     )
     pagination: PaginationMeta = Field(..., description="Pagination metadata.")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "success": False,
+                "message": "message",
+                "data": [],
+                "pagination": {"total": 2, "page": 1, "per_page": 1, "total_pages": 2},
+            }
+        }

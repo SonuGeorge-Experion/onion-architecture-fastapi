@@ -3,8 +3,13 @@ import math
 from fastapi import APIRouter, Depends, status
 
 from app.api.dependencies.db import get_async_db
-from app.api.schemas.donor import DonorCreate, DonorResponse
-from app.api.v1.responses import PaginatedResponse, PaginationMeta, SuccessResponse
+from app.api.schemas.donor import DonorCreate
+from app.api.v1.responses import (
+    ErrorResponse,
+    PaginatedResponse,
+    PaginationMeta,
+    SuccessResponse,
+)
 from app.application.dtos.donor import (
     CreateDonorInputDTO,
     DonorOutputDTO,
@@ -17,8 +22,56 @@ router = APIRouter()
 
 @router.post(
     "/donors",
-    response_model=SuccessResponse[DonorResponse],
+    response_model=SuccessResponse[DonorOutputDTO],
     status_code=status.HTTP_201_CREATED,
+    responses={
+        status.HTTP_201_CREATED: {
+            "description": "Donor created successfully",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": "true",
+                        "message": "Donor created successfully",
+                        "data": {
+                            "donor_id": 8,
+                            "znumber": 46371,
+                            "name": "joe5",
+                            "age": 63,
+                            "region": "CA",
+                            "other_factors": {"additionalProp1": {}},
+                        },
+                    }
+                }
+            },
+        },
+        status.HTTP_400_BAD_REQUEST: {
+            "model": ErrorResponse,
+            "description": "Bad Request",
+        },
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {
+            "model": ErrorResponse,
+            "description": "Validation Error",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": False,
+                        "error": {
+                            "code": "VALIDATION_ERROR",
+                            "type": "RequestValidationError",
+                            "message": "Invalid request data",
+                            "details": [
+                                {
+                                    "loc": ["body", "name"],
+                                    "msg": "field required",
+                                    "type": "value_error",
+                                }
+                            ],
+                        },
+                    }
+                }
+            },
+        },
+    },
 )
 async def create_donor(payload: DonorCreate, db=Depends(get_async_db)):
     """Create a new donor.
@@ -53,7 +106,40 @@ async def create_donor(payload: DonorCreate, db=Depends(get_async_db)):
     return SuccessResponse(message="Donor created successfully", data=output_dto)
 
 
-@router.get("/donors", response_model=PaginatedResponse[DonorOutputDTO])
+@router.get(
+    "/donors",
+    response_model=PaginatedResponse[DonorOutputDTO],
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {
+            "model": ErrorResponse,
+            "description": "Bad Request",
+        },
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {
+            "model": ErrorResponse,
+            "description": "Validation Error",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "success": False,
+                        "error": {
+                            "code": "VALIDATION_ERROR",
+                            "type": "RequestValidationError",
+                            "message": "Invalid query parameters",
+                            "details": [
+                                {
+                                    "loc": ["query", "page"],
+                                    "msg": "value is not a valid integer",
+                                    "type": "type_error.integer",
+                                }
+                            ],
+                        },
+                    }
+                }
+            },
+        },
+    },
+)
 async def list_donors(
     znumber: int | None = None,
     region: str | None = None,
