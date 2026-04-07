@@ -3,10 +3,9 @@ from fastapi import HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
+from app.api.v1.responses.error import ErrorDetail, ErrorResponse
 from app.core.logging import get_logger
 from app.domain.exceptions import DomainException, DuplicateZNumberException
-
-# from application.exceptions import UseCaseException
 
 logger = get_logger(__name__)
 
@@ -18,10 +17,10 @@ def register_exception_handlers(app):
     async def domain_exception_handler(request: Request, exc: DomainException):
         if isinstance(exc, DuplicateZNumberException):
             status_code = status.HTTP_409_CONFLICT
-            level = "warning"
+            # level = "warning"
         else:
             status_code = status.HTTP_400_BAD_REQUEST
-            level = "warning"
+            # level = "warning"
 
         # Log known domain exceptions without traceback (warning level)
         logger.warning(
@@ -35,12 +34,17 @@ def register_exception_handlers(app):
             },
         )
 
+        error_response = ErrorResponse(
+            error=ErrorDetail(
+                code="DOMAIN_ERROR",
+                type=exc.__class__.__name__,
+                message=str(exc),
+            )
+        )
+
         return JSONResponse(
             status_code=status_code,
-            content={
-                "error_type": exc.__class__.__name__,
-                "error_message": str(exc),
-            },
+            content=error_response.model_dump(),
         )
 
     # Request validation errors → 422, log with details
@@ -57,9 +61,19 @@ def register_exception_handlers(app):
                 "status_code": status.HTTP_422_UNPROCESSABLE_ENTITY,
             },
         )
+
+        error_response = ErrorResponse(
+            error=ErrorDetail(
+                code="VALIDATION_ERROR",
+                type="RequestValidationError",
+                message="Invalid request data",
+                details=exc.errors(),
+            )
+        )
+
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            content={"detail": exc.errors()},
+            content=error_response.model_dump(),
         )
 
     # Preserve HTTPException
@@ -74,9 +88,18 @@ def register_exception_handlers(app):
                 "method": request.method,
             },
         )
+
+        error_response = ErrorResponse(
+            error=ErrorDetail(
+                code="HTTP_ERROR",
+                type="HTTPException",
+                message=str(exc.detail),
+            )
+        )
+
         return JSONResponse(
             status_code=exc.status_code,
-            content={"detail": exc.detail},
+            content=error_response.model_dump(),
         )
 
     # Catch-all 500
@@ -92,10 +115,15 @@ def register_exception_handlers(app):
             },
         )
 
+        error_response = ErrorResponse(
+            error=ErrorDetail(
+                code="INTERNAL_SERVER_ERROR",
+                type=exc.__class__.__name__,
+                message="An unexpected error occurred.",
+            )
+        )
+
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={
-                "error_type": exc.__class__.__name__,
-                "error_message": "An unexpected error occurred.",
-            },
+            content=error_response.model_dump(),
         )
