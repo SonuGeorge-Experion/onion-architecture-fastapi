@@ -13,6 +13,14 @@ Onion Architecture
 - switch to development brach 
 
 ### 2. Create a virtual environment
+#### UV 
+- uv venv --python 3.12
+- uv add -r requirements.txt # Dont execute it if there is no requirement change
+- uv sync # uses uv.lock
+- uv run uvicorn app.main:app --reload
+- uv run alembic upgrade head 
+
+#### PIP MANAGER
 
 - python -m venv venv
 - source venv/bin/activate  # Ubuntu 
@@ -79,12 +87,7 @@ pre-commit run bandit --all-files
     -k uvicorn.workers.UvicornWorker \
     -w `<no-of-workers>` \
     -b 0.0.0.0:`<port-address>`  # with gunicorn 
-  
-#### UV
-- uv add -r requirements.txt # Dont execute it if there is no requirement change
-- uv sync # uses uv.lock
-- uv run uvicorn app.main:app --reload
-- uv run alembic upgrade head
+
 
 #### With Docker in local 
 
@@ -101,6 +104,7 @@ pre-commit run bandit --all-files
 - docker rm `<container_id>` # remove a stopped conatiner
 - docker images # list all images
 - docker rmi `<image_id>` # remove a docker image
+- docker run -it --entrypoint /bin/bash fastapi-apps
 
 
 ### 5. Migrations (Alembic)
