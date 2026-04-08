@@ -104,6 +104,7 @@ pre-commit run bandit --all-files
 - docker rm `<container_id>` # remove a stopped conatiner
 - docker images # list all images
 - docker rmi `<image_id>` # remove a docker image
+- docker run -it --entrypoint /bin/bash fastapi-apps
 
 
 ### 5. Migrations (Alembic)
